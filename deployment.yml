@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: url-shortener
-        image: ahmedlebshten/url-shortener:36
+        image: ahmedlebshten/url-shortener:37
         ports:
         - containerPort: 80
 
