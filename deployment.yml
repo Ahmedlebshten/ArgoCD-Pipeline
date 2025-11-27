@@ -18,7 +18,7 @@ spec:
       - name: url-shortener
         image: ahmedlebshten/url-shortener:37
         ports:
-        - containerPort: 80
+        - containerPort: 3000
 
 ---
 apiVersion: v1
@@ -31,4 +31,4 @@ spec:
     app: url-shortener
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: 3000
