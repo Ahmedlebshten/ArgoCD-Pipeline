@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: url-shortener
-        image: ahmedlebshten/url-shortener:42
+        image: ahmedlebshten/url-shortener:43
         ports:
         - containerPort: 3000
 
