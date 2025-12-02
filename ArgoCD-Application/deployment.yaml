@@ -15,16 +15,9 @@ spec:
         app: url-shortener
     spec:
       containers:
-<<<<<<< HEAD
-      - name: url-shortener
-      - image: ahmedlebshten/url-shortener:51
-        ports:
-        - containerPort: 3000
-=======
         - name: url-shortener
           image: ahmedlebshten/url-shortener:PLACEHOLDER_TAG
           ports:
             - containerPort: 3000
->>>>>>> e8750e0 (edit identation)
 
 
