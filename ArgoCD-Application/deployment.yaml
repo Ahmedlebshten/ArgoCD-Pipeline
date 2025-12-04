@@ -19,5 +19,3 @@ spec:
         image: ahmedlebshten/url-shortener:PLACEHOLDER_TAG
         ports:
         - containerPort: 3000
-
-
