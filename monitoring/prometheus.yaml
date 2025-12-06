@@ -1,7 +1,38 @@
+# ConfigMap: prometheus config
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      # scrape prometheus itself
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      # scrape node-exporter service (DaemonSet running on nodes)
+      - job_name: 'node-exporter'
+        static_configs:
+          - targets: ['node-exporter.monitoring.svc.cluster.local:9100']
+
+      # optional: scrape kubernetes endpoints (if you later add k8s SD)
+      # - job_name: 'kubernetes-endpoints'
+      #   kubernetes_sd_configs:
+      #     - role: endpoints
+
+---
+# Deployment: simple Prometheus
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
+  namespace: monitoring
   labels:
     app: prometheus
 spec:
@@ -15,19 +46,44 @@ spec:
         app: prometheus
     spec:
       containers:
-      - name: prometheus
-        image: prom/prometheus:latest
-        ports:
-        - containerPort: 9090
+        - name: prometheus
+          image: prom/prometheus:latest
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--web.listen-address=0.0.0.0:9090"
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+              readOnly: true
+            - name: data
+              mountPath: /prometheus
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+            items:
+              - key: prometheus.yml
+                path: prometheus.yml
+        - name: data
+          emptyDir: {}
+
 ---
+# Service: expose Prometheus inside cluster (ClusterIP)
 apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
+  namespace: monitoring
+  labels:
+    app: prometheus
 spec:
   selector:
     app: prometheus
   ports:
-  - port: 9090
-    targetPort: 9090
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
   type: ClusterIP
