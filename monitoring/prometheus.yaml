@@ -4,7 +4,7 @@ prometheus:
     # Retention period for metrics
     retention: 30d
 
-    # Storage configuration (disabled PVC مؤقتًا)
+    # Storage configuration (disabled PVC)
     storageSpec: {}
 
     # Service Monitor selector
@@ -19,6 +19,12 @@ prometheus:
         memory: 4Gi
         cpu: 2000m
 
+  # Service configuration (ClusterIP)
+  service:
+    type: ClusterIP
+    port: 9090
+    targetPort: 9090
+
 # Grafana included in kube-prometheus-stack (disabled, using separate)
 grafana:
   enabled: false
@@ -27,5 +33,4 @@ grafana:
 alertmanager:
   enabled: true
   alertmanagerSpec:
-    # Storage disabled مؤقتًا (بدون PVC)
     storage: {}
