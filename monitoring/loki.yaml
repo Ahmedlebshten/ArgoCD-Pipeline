@@ -1,14 +1,13 @@
 # Loki Configuration
 loki:
   enabled: true
-  
+
   persistence:
-    enabled: true
-    size: 10Gi
-  
+    enabled: false
+
   config:
     auth_enabled: false
-    
+
     ingester:
       chunk_idle_period: 3m
       chunk_block_size: 262144
@@ -19,12 +18,12 @@ loki:
           kvstore:
             store: inmemory
           replication_factor: 1
-    
+
     limits_config:
       enforce_metric_name: false
       reject_old_samples: true
       reject_old_samples_max_age: 168h
-    
+
     schema_config:
       configs:
         - from: 2020-10-24
@@ -34,10 +33,10 @@ loki:
           index:
             prefix: index_
             period: 24h
-    
+
     server:
       http_listen_port: 3100
-    
+
     storage_config:
       boltdb_shipper:
         active_index_directory: /data/loki/boltdb-shipper-active
@@ -46,25 +45,26 @@ loki:
         shared_store: filesystem
       filesystem:
         directory: /data/loki/chunks
-    
+
     chunk_store_config:
       max_look_back_period: 0s
-    
+
     table_manager:
       retention_deletes_enabled: false
       retention_period: 0s
 
+
 # Promtail Configuration (Log collector)
 promtail:
   enabled: true
-  
+
   config:
     clients:
       - url: http://loki:3100/loki/api/v1/push
-    
+
     positions:
       filename: /tmp/positions.yaml
-    
+
     scrape_configs:
       - job_name: kubernetes-pods
         kubernetes_sd_configs:
@@ -100,9 +100,11 @@ promtail:
               - __meta_kubernetes_pod_container_name
             target_label: __path__
 
+
 # Disable Grafana (we're installing it separately)
 grafana:
   enabled: false
+
 
 # Fluent Bit (optional, disabled by default)
 fluent-bit:
