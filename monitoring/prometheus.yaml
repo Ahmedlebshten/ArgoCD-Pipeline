@@ -3,19 +3,13 @@ prometheus:
   prometheusSpec:
     # Retention period for metrics
     retention: 30d
-    
-    # Storage configuration
-    storageSpec:
-      volumeClaimTemplate:
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 50Gi
-    
+
+    # Storage configuration (disabled PVC مؤقتًا)
+    storageSpec: {}
+
     # Service Monitor selector
     serviceMonitorSelectorNilUsesHelmValues: false
-    
+
     # Resources
     resources:
       requests:
@@ -33,10 +27,5 @@ grafana:
 alertmanager:
   enabled: true
   alertmanagerSpec:
-    storage:
-      volumeClaimTemplate:
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 10Gi
+    # Storage disabled مؤقتًا (بدون PVC)
+    storage: {}
