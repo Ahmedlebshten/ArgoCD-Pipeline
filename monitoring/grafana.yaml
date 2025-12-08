@@ -9,10 +9,9 @@ service:
   type: LoadBalancer
   port: 80
 
-# Persistence
+# Persistence (disabled مؤقتًا عشان مافيش StorageClass)
 persistence:
-  enabled: true
-  size: 10Gi
+  enabled: false
 
 # Datasources configuration
 datasources:
@@ -26,7 +25,7 @@ datasources:
         access: proxy
         isDefault: true
         editable: true
-      
+
       # Loki datasource
       - name: Loki
         type: loki
@@ -56,13 +55,13 @@ dashboards:
       gnetId: 7249
       revision: 1
       datasource: Prometheus
-    
+
     # Node exporter
     node-exporter:
       gnetId: 1860
       revision: 27
       datasource: Prometheus
-    
+
     # Loki dashboard
     loki-dashboard:
       gnetId: 13639
