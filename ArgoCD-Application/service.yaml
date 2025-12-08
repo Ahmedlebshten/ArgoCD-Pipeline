@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: url-shortener-svc
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: url-shortener
   ports:
