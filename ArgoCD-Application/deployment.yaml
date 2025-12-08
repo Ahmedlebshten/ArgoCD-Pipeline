@@ -15,7 +15,12 @@ spec:
         app: url-shortener
     spec:
       containers:
-      - name: url-shortener
-        image: ahmedlebshten/url-shortener:55
-        ports:
-        - containerPort: 3000
+        - name: url-shortener
+          image: ahmedlebshten/url-shortener:55
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+            - name: BASE_URL
+              value: "http://http://a61fda18b04d8481394e26e1ce8fd4f5-1389910586.us-east-1.elb.amazonaws.com/"
