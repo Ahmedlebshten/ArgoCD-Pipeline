@@ -1,18 +1,99 @@
 pipeline {
     agent any
 
+    environment {
+        AWS_REGION = 'us-east-1'
+        CLUSTER_NAME = 'hello-devops-production-cluster'
+        MONITORING_NAMESPACE = 'monitoring'
+        ARGOCD_NAMESPACE = 'argocd'
+        GITHUB_REPO = 'https://github.com/Ahmedlebshten/ArgoCD-Pipeline.git'
+    }
+
     stages {
 
-        stage('Create Monitoring Application') {
+        stage('Update Kubeconfig') {
             steps {
                 sh '''
                   set -e
-
-                  export AWS_REGION=us-east-1
-                  export CLUSTER_NAME=hello-devops-production-cluster
-
                   echo "🔹 Updating kubeconfig..."
                   aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+                '''
+            }
+        }
+
+        stage('Add Helm Repositories') {
+            steps {
+                sh '''
+                  set -e
+                  echo "🔹 Adding Helm repositories..."
+                  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                  helm repo add grafana https://grafana.github.io/helm-charts
+                  helm repo update
+                  echo "✅ Helm repositories added successfully!"
+                '''
+            }
+        }
+
+        stage('Create Monitoring Namespace') {
+            steps {
+                sh '''
+                  set -e
+                  echo "🔹 Creating monitoring namespace..."
+                  kubectl create namespace $MONITORING_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+                  echo "✅ Namespace created!"
+                '''
+            }
+        }
+
+        stage('Install Prometheus') {
+            steps {
+                sh '''
+                  set -e
+                  echo "🔹 Installing Prometheus..."
+                  helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \\
+                    --namespace $MONITORING_NAMESPACE \\
+                    --values monitoring/prometheus-values.yaml \\
+                    --wait \\
+                    --timeout 10m
+                  echo "✅ Prometheus installed successfully!"
+                '''
+            }
+        }
+
+        stage('Install Loki') {
+            steps {
+                sh '''
+                  set -e
+                  echo "🔹 Installing Loki..."
+                  helm upgrade --install loki grafana/loki-stack \\
+                    --namespace $MONITORING_NAMESPACE \\
+                    --values monitoring/loki-values.yaml \\
+                    --wait \\
+                    --timeout 10m
+                  echo "✅ Loki installed successfully!"
+                '''
+            }
+        }
+
+        stage('Install Grafana') {
+            steps {
+                sh '''
+                  set -e
+                  echo "🔹 Installing Grafana..."
+                  helm upgrade --install grafana grafana/grafana \\
+                    --namespace $MONITORING_NAMESPACE \\
+                    --values monitoring/grafana-values.yaml \\
+                    --wait \\
+                    --timeout 10m
+                  echo "✅ Grafana installed successfully!"
+                '''
+            }
+        }
+
+        stage('Create Monitoring ArgoCD Application') {
+            steps {
+                sh '''
+                  set -e
 
                   echo "🔹 Creating ArgoCD Monitoring Application..."
 
@@ -21,16 +102,16 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: monitoring
-  namespace: argocd
+  namespace: $ARGOCD_NAMESPACE
 spec:
   project: default
   source:
-    repoURL: https://github.com/Ahmedlebshten/ArgoCD-Pipeline.git
+    repoURL: $GITHUB_REPO
     targetRevision: HEAD
     path: monitoring
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring
+    namespace: $MONITORING_NAMESPACE
   syncPolicy:
     automated:
       prune: true
@@ -42,6 +123,59 @@ EOF
                   echo "🎉 Monitoring Application Created Successfully!"
                 '''
             }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                  set -e
+                  echo "🔹 Verifying deployments..."
+                  
+                  echo "📊 Checking Pods Status:"
+                  kubectl get pods -n $MONITORING_NAMESPACE
+                  
+                  echo "📊 Checking Services:"
+                  kubectl get svc -n $MONITORING_NAMESPACE
+                  
+                  echo "📊 ArgoCD Application Status:"
+                  kubectl get application monitoring -n $ARGOCD_NAMESPACE
+                  
+                  echo "🎉 All monitoring components deployed successfully!"
+                '''
+            }
+        }
+
+        stage('Get Access Information') {
+            steps {
+                sh '''
+                  set -e
+                  echo "======================================"
+                  echo "🎯 GRAFANA ACCESS INFORMATION"
+                  echo "======================================"
+                  echo "📌 Getting Grafana LoadBalancer URL..."
+                  kubectl get svc grafana -n $MONITORING_NAMESPACE
+                  echo ""
+                  echo "👤 Username: admin"
+                  echo "🔑 Password: admin123"
+                  echo "======================================"
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "======================================"
+            echo "🎉 Pipeline Completed Successfully!"
+            echo "======================================"
+            echo "✅ Prometheus installed and running"
+            echo "✅ Loki installed and running"
+            echo "✅ Grafana installed and running"
+            echo "✅ ArgoCD Application created"
+            echo "======================================"
+        }
+        failure {
+            echo "❌ Pipeline failed. Check logs above for details."
         }
     }
 }

@@ -1,41 +1,42 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: prometheus
-  namespace: monitoring
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: prometheus
-  template:
-    metadata:
-      labels:
-        app: prometheus
-    spec:
-      containers:
-        - name: prometheus
-          image: prom/prometheus
-          ports:
-            - containerPort: 9090
-          volumeMounts:
-            - name: prometheus-config-volume
-              mountPath: /etc/prometheus/prometheus.yml
-              subPath: prometheus.yml
-      volumes:
-        - name: prometheus-config-volume
-          configMap:
-            name: prometheus-config
+# Prometheus Configuration
+prometheus:
+  prometheusSpec:
+    # Retention period for metrics
+    retention: 30d
+    
+    # Storage configuration
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+    
+    # Service Monitor selector
+    serviceMonitorSelectorNilUsesHelmValues: false
+    
+    # Resources
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 1000m
+      limits:
+        memory: 4Gi
+        cpu: 2000m
 
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: prometheus
-spec:
-  selector:
-    app: prometheus
-  ports:
-  - port: 9090
-    targetPort: 9090
-  type: ClusterIP
+# Grafana included in kube-prometheus-stack (disabled, using separate)
+grafana:
+  enabled: false
+
+# Alertmanager configuration
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
