@@ -152,9 +152,6 @@ EOF
                   echo "======================================"
                   echo "🎯 GRAFANA ACCESS INFORMATION"
                   echo "======================================"
-                  echo "📌 Getting Grafana LoadBalancer URL..."
-                  kubectl get svc grafana -n $MONITORING_NAMESPACE
-                  echo ""
                   echo "👤 Username: admin"
                   echo "🔑 Password: admin123"
                   echo "======================================"
