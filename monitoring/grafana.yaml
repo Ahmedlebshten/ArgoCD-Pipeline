@@ -6,7 +6,7 @@ adminPassword: admin123
 
 # Service configuration
 service:
-  type: LoadBalancer
+  type: ClusterIP
   port: 80
 
 # Persistence (disabled مؤقتًا عشان مافيش StorageClass)
