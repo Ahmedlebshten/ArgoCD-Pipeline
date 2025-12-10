@@ -19,3 +19,8 @@ spec:
         image: ahmedlebshten/url-shortener:75
         ports:
         - containerPort: 2020
+        env:
+        - name: PUBLIC_HOST
+          value: "a808e272caeb04b0eba57463bb465852-1238728338.us-east-1.elb.amazonaws.com"
+        - name: PUBLIC_PROTOCOL
+          value: "http"
