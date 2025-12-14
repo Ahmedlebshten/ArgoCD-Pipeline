@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: url-shortener
-        image: ahmedlebshten/url-shortener:77
+        image: ahmedlebshten/url-shortener:78
         ports:
         - containerPort: 2020
