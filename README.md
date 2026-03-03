@@ -1,11 +1,11 @@
 # URL Shortener Webservice – CI/CD on EKS using Jenkins & ArgoCD 
 
-## Overview
+## 📌 Overview
 - A simple CI/CD pipeline that builds a Docker image using Jenkins and deploys it automatically to an Amazon EKS cluster using ArgoCD (GitOps).
 
 ____
 
-## Flow
+## 🏗 Architecture Flow
 Jenkins (CI)
 - Builds Docker image from Dockerfile
 - Pushes image to Docker Hub
@@ -17,7 +17,7 @@ ArgoCD (CD)
 - Runs the application
 - Exposes it using a LoadBalancer Service
 
-## Repo Structure
+## 🏗️ Repo Structure
 ```
 project-root/
 │
@@ -48,7 +48,7 @@ ____
 ```
 kubectl get svc
 ```
-Copy the EXTERNAL-IP and open it in browser.
+Copy the DNS of LB and open it in browser.
 
 ____
 
